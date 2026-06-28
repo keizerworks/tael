@@ -1,0 +1,33 @@
+{
+  "name": "tael",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Persistent context for humans and AI. Never start an AI session from scratch again.",
+  "license": "AGPL-3.0-only",
+  "author": "keizerworks",
+  "homepage": "https://github.com/keizerworks/tael#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keizerworks/tael.git"
+  },
+  "bugs": "https://github.com/keizerworks/tael/issues",
+  "type": "module",
+  "packageManager": "pnpm@11.5.2",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "turbo": "^2.5.0",
+    "typescript": "^5.6.3"
+  }
+}
