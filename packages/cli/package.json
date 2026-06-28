@@ -1,0 +1,55 @@
+{
+  "name": "@tael/cli",
+  "version": "0.1.0",
+  "description": "Tael CLI — persistent context for humans and AI.",
+  "license": "AGPL-3.0-only",
+  "author": "keizerworks",
+  "homepage": "https://github.com/keizerworks/tael/tree/main/packages/cli#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keizerworks/tael.git",
+    "directory": "packages/cli"
+  },
+  "bugs": "https://github.com/keizerworks/tael/issues",
+  "keywords": [
+    "tael",
+    "ai",
+    "context",
+    "cli",
+    "claude",
+    "cursor",
+    "git",
+    "developer-tools"
+  ],
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "tael": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "ora": "^8.1.0"
+  },
+  "devDependencies": {
+    "@tael/core": "workspace:*",
+    "@tael/types": "workspace:*",
+    "@types/node": "^22.7.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.3"
+  }
+}
