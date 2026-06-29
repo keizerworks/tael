@@ -18,7 +18,7 @@ function clip(transcript: string): string {
 }
 
 export interface SyncOptions {
-  cwd?: string;
+  dir?: string;
   sourceName?: SessionSourceName;
   credentials?: ProviderCredentials;
   onSynced?: (session: SyncedSession) => void;
@@ -33,7 +33,7 @@ export async function syncSessions(
   project: Project,
   options: SyncOptions = {},
 ): Promise<SyncSummary> {
-  const cwd = options.cwd ?? process.cwd();
+  const dir = options.dir ?? process.cwd();
   const credentials = options.credentials ?? (await loadCredentials());
   const provider = createProvider(credentials);
   const sources = options.sourceName ? [getSource(options.sourceName)] : availableSources();
@@ -42,7 +42,7 @@ export async function syncSessions(
   let skipped = 0;
 
   for (const source of sources) {
-    for (const discovered of await source.discover(cwd)) {
+    for (const discovered of await source.discover(dir)) {
       if (sessionExists(project.id, discovered.id)) {
         skipped += 1;
         continue;

@@ -79,6 +79,16 @@ export async function getProject(id: string): Promise<Project | null> {
   }
 }
 
+export async function setProjectRepo(id: string, repoPath: string | null): Promise<Project> {
+  const project = await getProject(id);
+  if (!project) {
+    throw new ProjectNotFoundError(id);
+  }
+  const updated: Project = { ...project, repoPath };
+  await writeJson(projectFile(id), updated);
+  return updated;
+}
+
 export async function listProjects(): Promise<Project[]> {
   let ids: string[];
   try {

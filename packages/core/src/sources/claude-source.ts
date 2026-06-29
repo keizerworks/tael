@@ -66,18 +66,18 @@ export class ClaudeSource implements SessionSource {
     return existsSync(claudeProjectsDir());
   }
 
-  async discover(cwd: string): Promise<DiscoveredSession[]> {
-    const dir = join(claudeProjectsDir(), encodeCwd(cwd));
+  async discover(dir: string): Promise<DiscoveredSession[]> {
+    const projectDir = join(claudeProjectsDir(), encodeCwd(dir));
     let files: string[];
     try {
-      files = await readdir(dir);
+      files = await readdir(projectDir);
     } catch {
       return [];
     }
 
     const sessions: DiscoveredSession[] = [];
     for (const file of files.filter((name) => name.endsWith('.jsonl'))) {
-      const link = join(dir, file);
+      const link = join(projectDir, file);
       const info = await stat(link);
       sessions.push({
         id: file.replace(/\.jsonl$/, ''),

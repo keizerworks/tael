@@ -17,5 +17,6 @@ export interface DiscoveredSession {
 export interface SessionSource {
   readonly name: SessionSourceName;
   isAvailable(): boolean;
-  discover(cwd: string): Promise<DiscoveredSession[]>;
+  // `dir` is the project's repo path; sources return only sessions for that dir.
+  discover(dir: string): Promise<DiscoveredSession[]>;
 }
