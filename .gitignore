@@ -35,3 +35,6 @@ coverage/
 # Note: this ignores a top-level .tael in THIS repo only; it does not
 # affect consumers of the published CLI.
 /.tael/
+
+# Local-only project scope & planning. Never pushed to the public OSS repo.
+/.scope/
