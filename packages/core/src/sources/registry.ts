@@ -1,9 +1,10 @@
 import type { SessionSourceName } from '@tael/types';
 import { TaelError } from '../errors.js';
 import { ClaudeSource } from './claude-source.js';
+import { CodexSource } from './codex-source.js';
 import type { SessionSource } from './source.js';
 
-const SOURCES: SessionSource[] = [new ClaudeSource()];
+const SOURCES: SessionSource[] = [new ClaudeSource(), new CodexSource()];
 
 export const SESSION_SOURCES: SessionSourceName[] = SOURCES.map((source) => source.name);
 

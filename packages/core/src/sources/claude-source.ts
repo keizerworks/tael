@@ -3,7 +3,12 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import type { SessionSourceName } from '@tael/types';
-import type { DiscoveredSession, ParsedTranscript, SessionSource } from './source.js';
+import {
+  deriveTitle,
+  type DiscoveredSession,
+  type ParsedTranscript,
+  type SessionSource,
+} from './source.js';
 
 interface ClaudeBlock {
   type?: string;
@@ -53,10 +58,8 @@ export function parseClaudeTranscript(raw: string): ParsedTranscript {
     }
   }
 
-  const firstUser = messages.find((message) => message.role === 'user');
-  const title = (firstUser?.text ?? 'Untitled session').replace(/\s+/g, ' ').slice(0, 80);
   const text = messages.map((message) => `${message.role}: ${message.text}`).join('\n\n');
-  return { text, title, messageCount: messages.length };
+  return { text, title: deriveTitle(messages), messageCount: messages.length };
 }
 
 export class ClaudeSource implements SessionSource {

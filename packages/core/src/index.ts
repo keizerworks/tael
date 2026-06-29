@@ -15,6 +15,8 @@ export * from './context-store.js';
 export * from './frontmatter.js';
 export * from './sessions-store.js';
 export * from './sources/source.js';
+export * from './sources/claude-source.js';
+export * from './sources/codex-source.js';
 export * from './sources/registry.js';
 export * from './sync-sessions.js';
 export * from './transcript.js';
@@ -22,4 +24,4 @@ export * from './actions.js';
 export * from './ask.js';
 export * from './chat.js';
 
-export { SUPPORTED_PROVIDERS, DEFAULT_MODELS } from '@tael/providers';
+export { SUPPORTED_PROVIDERS, DEFAULT_MODELS, DEFAULT_SUMMARY_MODELS } from '@tael/providers';
