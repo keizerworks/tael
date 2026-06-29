@@ -1,71 +1,53 @@
 import { describe, expect, it } from 'vitest';
-import type { Context, Memory, Profile, Session } from '@tael/types';
-import { buildAskMessages, buildSystemPrompt } from './context.js';
+import type { Bug, Feature, Project } from '@tael/types';
+import { buildProjectMessages, buildProjectPrompt } from './context.js';
 
-const profile: Profile = {
-  name: 'Rahul Sain',
-  currentProject: 'Tael',
-  goals: ['Ship v0.2'],
+const project: Project = {
+  id: 'tael',
+  name: 'Tael',
+  description: 'A model-agnostic personal AI CLI.',
+  repoPath: null,
+  createdAt: '2026-06-29T00:00:00Z',
 };
 
-const contexts: Context[] = [
+const features: Feature[] = [
   {
-    id: 'tael-product',
-    title: 'Tael — Product',
-    description: 'What Tael is',
-    body: 'Tael is a personal AI CLI that remembers people.',
-    tags: [],
-    createdAt: '2026-06-29T00:00:00Z',
-    updatedAt: '2026-06-29T00:00:00Z',
+    id: 1,
+    title: 'interactive chat',
+    status: 'done',
+    createdAt: '',
+    completedAt: '2026-06-29T01:00:00Z',
   },
+  { id: 2, title: 'session import', status: 'open', createdAt: '', completedAt: null },
 ];
 
-const session: Session = {
-  id: '2026-06-29T10-00-00',
-  timestamp: '2026-06-29T10:00:00.000Z',
-  branch: 'feat/ask',
-  recentCommits: [
-    { hash: 'a1', message: 'Add provider layer', author: 'Rahul', date: '2026-06-29T09:00:00Z' },
-  ],
-  changedFiles: ['packages/core/src/ask.ts'],
-  summary: 'wiring tael ask',
-};
-
-const memories: Memory[] = [
-  { id: 'm1', content: 'Prefers concise answers', tags: [], createdAt: '2026-06-28T00:00:00Z' },
+const bugs: Bug[] = [
+  { id: 1, title: 'duplicate line in repl', status: 'open', createdAt: '', completedAt: null },
 ];
 
-describe('buildSystemPrompt', () => {
-  it('includes profile, contexts, memories and the latest session', () => {
-    const prompt = buildSystemPrompt({ profile, contexts, session, memories });
-    expect(prompt).toContain('Name: Rahul Sain');
-    expect(prompt).toContain('Current project: Tael');
-    expect(prompt).toContain('- Ship v0.2');
-    expect(prompt).toContain('### Tael — Product');
-    expect(prompt).toContain('Tael is a personal AI CLI that remembers people.');
-    expect(prompt).toContain('- Prefers concise answers');
-    expect(prompt).toContain('Branch: feat/ask');
-    expect(prompt).toContain('- Add provider layer');
-    expect(prompt).toContain('Summary: wiring tael ask');
+describe('buildProjectPrompt', () => {
+  it('includes the project, its features and bugs with status', () => {
+    const prompt = buildProjectPrompt({ profile: 'I am Rahul.', project, features, bugs });
+    expect(prompt).toContain('About the user');
+    expect(prompt).toContain('I am Rahul.');
+    expect(prompt).toContain('## Active project: Tael');
+    expect(prompt).toContain('A model-agnostic personal AI CLI.');
+    expect(prompt).toContain('- [x] #1 interactive chat');
+    expect(prompt).toContain('- [ ] #2 session import');
+    expect(prompt).toContain('- [ ] #1 duplicate line in repl');
   });
 
-  it('omits empty sections gracefully', () => {
-    const prompt = buildSystemPrompt({
-      profile: { name: '', currentProject: '', goals: [] },
-      contexts: [],
-      session: null,
-      memories: [],
-    });
-    expect(prompt).toContain('Name: Unknown');
-    expect(prompt).not.toContain('## Context');
-    expect(prompt).not.toContain('## Memories');
-    expect(prompt).not.toContain('## Most recent session');
+  it('omits the profile section when empty and shows (none yet) for empty lists', () => {
+    const prompt = buildProjectPrompt({ profile: '', project, features: [], bugs: [] });
+    expect(prompt).not.toContain('About the user');
+    expect(prompt).toContain('### Features\n(none yet)');
+    expect(prompt).toContain('### Bugs\n(none yet)');
   });
 });
 
-describe('buildAskMessages', () => {
-  it('puts context in a system message and the question in a user message', () => {
-    const messages = buildAskMessages({ profile, contexts, session, memories }, 'what next?');
+describe('buildProjectMessages', () => {
+  it('wraps context as a system message and the question as a user message', () => {
+    const messages = buildProjectMessages({ profile: '', project, features, bugs }, 'what next?');
     expect(messages).toHaveLength(2);
     expect(messages[0]?.role).toBe('system');
     expect(messages[1]).toEqual({ role: 'user', content: 'what next?' });

@@ -4,8 +4,7 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ProviderCredentials } from '@tael/types';
 import { ChatSession } from './chat.js';
-import { createContext } from './context-store.js';
-import { initWorkspace, type Workspace } from './workspace.js';
+import { addBug, addFeature, createProject, setActiveProject } from './projects.js';
 
 const credentials: ProviderCredentials = {
   provider: 'anthropic',
@@ -23,42 +22,41 @@ function mockFetchOnce(text: string) {
 }
 
 describe('ChatSession', () => {
-  let workspace: Workspace;
-  let dir: string;
+  let home: string;
 
   beforeEach(async () => {
-    dir = await mkdtemp(join(tmpdir(), 'tael-chat-'));
-    workspace = await initWorkspace(dir, { name: 'Rahul', currentProject: 'tael' });
-    await createContext(workspace, {
-      title: 'Tael',
-      description: 'the product',
-      body: 'A personal AI CLI.',
-    });
+    home = await mkdtemp(join(tmpdir(), 'tael-home-'));
+    process.env.TAEL_HOME = home;
+    await createProject('Tael', { description: 'a personal AI CLI' });
+    await setActiveProject('tael');
+    await addFeature('tael', 'session import');
+    await addBug('tael', 'duplicate line in repl');
   });
 
   afterEach(async () => {
-    await rm(dir, { recursive: true, force: true });
+    delete process.env.TAEL_HOME;
+    await rm(home, { recursive: true, force: true });
     vi.unstubAllGlobals();
   });
 
-  it('seeds the system prompt with context and keeps multi-turn history', async () => {
+  it('seeds the prompt with the active project and keeps multi-turn history', async () => {
     const fetchFn = vi
       .fn()
       .mockResolvedValueOnce(mockFetchOnce('first answer'))
       .mockResolvedValueOnce(mockFetchOnce('second answer'));
     vi.stubGlobal('fetch', fetchFn);
 
-    const chat = await ChatSession.create(workspace, { credentials });
-    expect(chat.modelName).toBe('claude-test');
+    const chat = await ChatSession.create({ credentials });
+    expect(chat.projectName).toBe('Tael');
 
     expect(await chat.send('hi')).toBe('first answer');
     expect(await chat.send('again')).toBe('second answer');
 
-    // The system prompt sent on turn 1 should carry the context body.
     const firstBody = JSON.parse(fetchFn.mock.calls[0]![1].body as string);
-    expect(firstBody.system).toContain('A personal AI CLI.');
+    expect(firstBody.system).toContain('Active project: Tael');
+    expect(firstBody.system).toContain('session import');
+    expect(firstBody.system).toContain('duplicate line in repl');
 
-    // Turn 2 must include the prior user + assistant turns (real conversation memory).
     const secondBody = JSON.parse(fetchFn.mock.calls[1]![1].body as string);
     expect(secondBody.messages).toEqual([
       { role: 'user', content: 'hi' },

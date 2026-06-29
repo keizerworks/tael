@@ -1,80 +1,48 @@
-import type { ChatMessage, Context, Memory, Profile, Session } from '@tael/types';
+import type { Bug, ChatMessage, Feature, Project } from '@tael/types';
 
-export interface ContextInput {
-  profile: Profile;
-  contexts: Context[];
-  session: Session | null;
-  memories: Memory[];
+export interface ProjectContextInput {
+  profile: string;
+  project: Project;
+  features: Feature[];
+  bugs: Bug[];
 }
 
-export function buildSystemPrompt({ profile, contexts, session, memories }: ContextInput): string {
+function renderChecklist(items: Array<Feature | Bug>): string[] {
+  if (items.length === 0) {
+    return ['(none yet)'];
+  }
+  return items.map((item) => `- [${item.status === 'done' ? 'x' : ' '}] #${item.id} ${item.title}`);
+}
+
+export function buildProjectPrompt({
+  profile,
+  project,
+  features,
+  bugs,
+}: ProjectContextInput): string {
   const lines: string[] = [
-    'You are Tael, a personal assistant that already knows the user from their stored context.',
-    'Use the context below to answer with continuity, as if you have been working alongside them.',
-    'Be concise and direct.',
-    '',
-    '## User',
-    `Name: ${profile.name || 'Unknown'}`,
+    'You are Tael, a personal assistant that already knows the user and their projects.',
+    'Answer with continuity, grounded in the project context below. Be concise and direct.',
   ];
 
-  if (profile.currentProject) {
-    lines.push(`Current project: ${profile.currentProject}`);
-  }
-  if (profile.goals.length > 0) {
-    lines.push('Goals:');
-    for (const goal of profile.goals) {
-      lines.push(`- ${goal}`);
-    }
+  if (profile.trim()) {
+    lines.push('', '## About the user', profile.trim());
   }
 
-  if (contexts.length > 0) {
-    lines.push('', '## Context');
-    for (const context of contexts) {
-      lines.push('', `### ${context.title}`);
-      if (context.description) {
-        lines.push(context.description);
-      }
-      if (context.body) {
-        lines.push('', context.body);
-      }
-    }
+  lines.push('', `## Active project: ${project.name}`);
+  if (project.description) {
+    lines.push(project.description);
   }
 
-  if (memories.length > 0) {
-    lines.push('', '## Memories');
-    for (const memory of memories) {
-      lines.push(`- ${memory.content}`);
-    }
-  }
-
-  if (session) {
-    lines.push('', '## Most recent session');
-    if (session.branch) {
-      lines.push(`Branch: ${session.branch}`);
-    }
-    if (session.recentCommits.length > 0) {
-      lines.push('Recent commits:');
-      for (const commit of session.recentCommits) {
-        lines.push(`- ${commit.message}`);
-      }
-    }
-    if (session.changedFiles.length > 0) {
-      lines.push('Uncommitted changes:');
-      for (const file of session.changedFiles) {
-        lines.push(`- ${file}`);
-      }
-    }
-    if (session.summary.trim()) {
-      lines.push(`Summary: ${session.summary.trim()}`);
-    }
-  }
+  lines.push('', '### Features', ...renderChecklist(features));
+  lines.push('', '### Bugs', ...renderChecklist(bugs));
 
   return lines.join('\n');
 }
 
-export function buildAskMessages(context: ContextInput, question: string): ChatMessage[] {
+export function buildProjectMessages(input: ProjectContextInput, question: string): ChatMessage[] {
   return [
-    { role: 'system', content: buildSystemPrompt(context) },
+    { role: 'system', content: buildProjectPrompt(input) },
     { role: 'user', content: question },
   ];
 }

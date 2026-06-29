@@ -1,11 +1,9 @@
 import { createProvider } from '@tael/providers';
 import type { ChatResponse, ProviderCredentials } from '@tael/types';
-import { buildAskMessages } from './context.js';
-import { listContexts } from './context-store.js';
+import { buildProjectMessages } from './context.js';
 import { loadCredentials } from './credentials.js';
-import { listMemories } from './memories.js';
-import { getLatestSession } from './session.js';
-import { readProfile, type Workspace } from './workspace.js';
+import { loadProfile } from './profile-store.js';
+import { listBugs, listFeatures, requireActiveProject } from './projects.js';
 
 export interface AskOptions {
   credentials?: ProviderCredentials;
@@ -13,21 +11,17 @@ export interface AskOptions {
   temperature?: number;
 }
 
-export async function ask(
-  workspace: Workspace,
-  question: string,
-  options: AskOptions = {},
-): Promise<ChatResponse> {
+export async function ask(question: string, options: AskOptions = {}): Promise<ChatResponse> {
   const credentials = options.credentials ?? (await loadCredentials());
+  const project = await requireActiveProject();
 
-  const [profile, contexts, session, memories] = await Promise.all([
-    readProfile(workspace),
-    listContexts(workspace),
-    getLatestSession(workspace),
-    listMemories(workspace),
+  const [features, bugs, profile] = await Promise.all([
+    listFeatures(project.id),
+    listBugs(project.id),
+    loadProfile(),
   ]);
 
-  const messages = buildAskMessages({ profile, contexts, session, memories }, question);
+  const messages = buildProjectMessages({ profile, project, features, bugs }, question);
   const provider = createProvider(credentials);
 
   return provider.chat({

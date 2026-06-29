@@ -1,11 +1,9 @@
 import { createProvider, type Provider } from '@tael/providers';
 import type { ChatMessage, ProviderCredentials } from '@tael/types';
-import { buildSystemPrompt } from './context.js';
-import { listContexts } from './context-store.js';
+import { buildProjectPrompt } from './context.js';
 import { loadCredentials } from './credentials.js';
-import { listMemories } from './memories.js';
-import { getLatestSession } from './session.js';
-import { readProfile, type Workspace } from './workspace.js';
+import { loadProfile } from './profile-store.js';
+import { listBugs, listFeatures, requireActiveProject } from './projects.js';
 
 export interface ChatSessionOptions {
   credentials?: ProviderCredentials;
@@ -21,25 +19,29 @@ export class ChatSession {
     private readonly model: string,
     private readonly options: ChatSessionOptions,
     systemPrompt: string,
+    public readonly projectName: string,
   ) {
     this.messages = [{ role: 'system', content: systemPrompt }];
   }
 
-  static async create(
-    workspace: Workspace,
-    options: ChatSessionOptions = {},
-  ): Promise<ChatSession> {
+  static async create(options: ChatSessionOptions = {}): Promise<ChatSession> {
     const credentials = options.credentials ?? (await loadCredentials());
+    const project = await requireActiveProject();
 
-    const [profile, contexts, session, memories] = await Promise.all([
-      readProfile(workspace),
-      listContexts(workspace),
-      getLatestSession(workspace),
-      listMemories(workspace),
+    const [features, bugs, profile] = await Promise.all([
+      listFeatures(project.id),
+      listBugs(project.id),
+      loadProfile(),
     ]);
 
-    const systemPrompt = buildSystemPrompt({ profile, contexts, session, memories });
-    return new ChatSession(createProvider(credentials), credentials.model, options, systemPrompt);
+    const systemPrompt = buildProjectPrompt({ profile, project, features, bugs });
+    return new ChatSession(
+      createProvider(credentials),
+      credentials.model,
+      options,
+      systemPrompt,
+      project.name,
+    );
   }
 
   get modelName(): string {
