@@ -9,6 +9,7 @@ export interface WorkspacePaths {
   profile: string;
   sessions: string;
   memories: string;
+  contexts: string;
 }
 
 export function resolveWorkspacePaths(root: string): WorkspacePaths {
@@ -20,6 +21,7 @@ export function resolveWorkspacePaths(root: string): WorkspacePaths {
     profile: join(dir, FILES.profile),
     sessions: join(dir, DIRS.sessions),
     memories: join(dir, DIRS.memories),
+    contexts: join(dir, DIRS.contexts),
   };
 }
 

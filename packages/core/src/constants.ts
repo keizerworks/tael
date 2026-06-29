@@ -10,6 +10,7 @@ export const FILES = {
 export const DIRS = {
   sessions: 'sessions',
   memories: 'memories',
+  contexts: 'contexts',
 } as const;
 
 export const DEFAULT_COMMIT_LIMIT = 10;

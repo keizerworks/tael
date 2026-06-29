@@ -25,6 +25,7 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
+    "@tael/providers": "workspace:*",
     "@tael/types": "workspace:*"
   },
   "devDependencies": {

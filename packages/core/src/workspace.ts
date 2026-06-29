@@ -34,6 +34,7 @@ export async function initWorkspace(root: string, options: InitOptions = {}): Pr
 
   await mkdir(paths.sessions, { recursive: true });
   await mkdir(paths.memories, { recursive: true });
+  await mkdir(paths.contexts, { recursive: true });
 
   const config: Config = {
     version: WORKSPACE_VERSION,
