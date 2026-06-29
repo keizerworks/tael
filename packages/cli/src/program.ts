@@ -11,6 +11,8 @@ import { useCommand } from './commands/use.js';
 import { feature } from './commands/feature.js';
 import { bug } from './commands/bug.js';
 import { sessionListCommand, sessionShowCommand } from './commands/session.js';
+import { modelCommand } from './commands/model.js';
+import { statusCommand } from './commands/status.js';
 
 const VERSION = '0.1.0';
 
@@ -53,7 +55,20 @@ export function createProgram(): Command {
     .option('-p, --provider <provider>', 'provider: anthropic | openai', 'anthropic')
     .option('-m, --model <model>', 'model id (defaults per provider)')
     .option('-k, --key <key>', 'API key (omit to use the provider env var)')
+    .option('-s, --summary-model <model>', 'cheaper model used only for session summaries')
     .action(loginCommand);
+
+  program
+    .command('model')
+    .description('Show or switch your chat model (and --summary model)')
+    .argument('[model]', 'set the chat model')
+    .option('-s, --summary <model>', 'set the cheaper summary model')
+    .action(modelCommand);
+
+  program
+    .command('status')
+    .description('Show provider, models, and the active project at a glance')
+    .action(statusCommand);
 
   program
     .command('ask')

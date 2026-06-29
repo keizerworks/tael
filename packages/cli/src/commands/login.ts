@@ -6,6 +6,7 @@ export interface LoginCommandOptions {
   provider?: string;
   model?: string;
   key?: string;
+  summaryModel?: string;
 }
 
 export async function loginCommand(options: LoginCommandOptions): Promise<void> {
@@ -21,7 +22,12 @@ export async function loginCommand(options: LoginCommandOptions): Promise<void> 
 
   const model = options.model ?? DEFAULT_MODELS[provider];
 
-  await saveCredentials({ provider, model, apiKey: options.key });
+  await saveCredentials({
+    provider,
+    model,
+    apiKey: options.key,
+    ...(options.summaryModel ? { summaryModel: options.summaryModel } : {}),
+  });
 
   ui.success(`Configured ${ui.bold(provider)} with model ${ui.cyan(model)}`);
   if (options.key) {
