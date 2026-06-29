@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Box, render, Static, Text, useApp, useInput } from 'ink';
 import Spinner from 'ink-spinner';
 import { parseMentions, type ChatSession } from '@tael/core';
-import type { Context } from '@tael/types';
 import { renderMarkdown } from '../markdown.js';
 
 interface Message {
@@ -10,17 +9,23 @@ interface Message {
   content: string;
 }
 
+interface Mention {
+  id: string;
+  title: string;
+}
+
 interface ChatAppProps {
   chat: ChatSession;
-  contexts: Context[];
+  mentions: Mention[];
+  projectName: string;
 }
 
 const MENTION_RE = /@([a-z0-9-]*)$/;
 
 const HELP = [
   '/help      show this help',
-  '/contexts  list available contexts',
-  '@id        mention a context (↑/↓ to choose, Tab/Enter to insert)',
+  '/items     list features/bugs you can @mention',
+  '@id        mention a feature/bug (↑/↓ to choose, Tab/Enter to insert)',
   '/exit      quit (or Ctrl-C)',
 ].join('\n');
 
@@ -56,9 +61,14 @@ function MessageView({ message }: { message: Message }) {
   );
 }
 
-function ChatApp({ chat, contexts }: ChatAppProps) {
+function ChatApp({ chat, mentions, projectName }: ChatAppProps) {
   const { exit } = useApp();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: 'info',
+      content: `Tael · ${projectName} · ${chat.modelName} · /help · @mention · /exit`,
+    },
+  ]);
   const [value, setValue] = useState('');
   const [thinking, setThinking] = useState(false);
   const [selected, setSelected] = useState(0);
@@ -67,7 +77,7 @@ function ChatApp({ chat, contexts }: ChatAppProps) {
   const mentionQuery = mentionMatch ? (mentionMatch[1] ?? '') : null;
   const suggestions =
     mentionQuery !== null
-      ? contexts.filter((context) => context.id.startsWith(mentionQuery)).slice(0, 6)
+      ? mentions.filter((mention) => mention.id.startsWith(mentionQuery)).slice(0, 6)
       : [];
   const mentionOpen = suggestions.length > 0;
 
@@ -93,10 +103,10 @@ function ChatApp({ chat, contexts }: ChatAppProps) {
       append({ role: 'info', content: HELP });
       return;
     }
-    if (question === '/contexts') {
-      const list = contexts.length
-        ? contexts.map((c) => `@${c.id} · ${c.title}`).join('\n')
-        : '(no contexts yet — add one with `tael context add`)';
+    if (question === '/items') {
+      const list = mentions.length
+        ? mentions.map((m) => `@${m.id} · ${m.title}`).join('\n')
+        : '(no features/bugs yet — add with `tael feature add` or `tael bug add`)';
       append({ role: 'info', content: list });
       return;
     }
@@ -105,10 +115,10 @@ function ChatApp({ chat, contexts }: ChatAppProps) {
     setThinking(true);
     try {
       const mentioned = parseMentions(question).filter((id) =>
-        contexts.some((context) => context.id === id),
+        mentions.some((mention) => mention.id === id),
       );
       const message = mentioned.length
-        ? `${question}\n\n[The user referenced these contexts: ${mentioned.join(', ')}. Prioritise them.]`
+        ? `${question}\n\n[The user referenced: ${mentioned.join(', ')}. Prioritise these.]`
         : question;
       const answer = await chat.send(message);
       append({ role: 'assistant', content: answer });
@@ -181,14 +191,14 @@ function ChatApp({ chat, contexts }: ChatAppProps) {
 
         {mentionOpen ? (
           <Box flexDirection="column" marginLeft={2}>
-            {suggestions.map((context, i) => (
+            {suggestions.map((item, i) => (
               <Text
-                key={context.id}
+                key={item.id}
                 inverse={i === selected}
                 color={i === selected ? 'blue' : undefined}
               >
-                {` @${context.id} `}
-                <Text dimColor>· {context.title}</Text>
+                {` @${item.id} `}
+                <Text dimColor>· {item.title}</Text>
               </Text>
             ))}
           </Box>

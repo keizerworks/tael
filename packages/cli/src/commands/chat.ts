@@ -1,11 +1,18 @@
-import { ChatSession, listContexts, loadWorkspace } from '@tael/core';
+import { ChatSession, listBugs, listFeatures, requireActiveProject } from '@tael/core';
 import { runChat } from '../ui/chat-app.js';
 
 export async function chatCommand(): Promise<void> {
-  const workspace = loadWorkspace(process.cwd());
-  const [chat, contexts] = await Promise.all([
-    ChatSession.create(workspace),
-    listContexts(workspace),
+  const project = await requireActiveProject();
+  const [chat, features, bugs] = await Promise.all([
+    ChatSession.create(),
+    listFeatures(project.id),
+    listBugs(project.id),
   ]);
-  await runChat({ chat, contexts });
+
+  const mentions = [
+    ...features.map((f) => ({ id: `feature-${f.id}`, title: f.title })),
+    ...bugs.map((b) => ({ id: `bug-${b.id}`, title: b.title })),
+  ];
+
+  await runChat({ chat, mentions, projectName: project.name });
 }
