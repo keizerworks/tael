@@ -1,8 +1,10 @@
+import { resolve } from 'node:path';
 import { createProject, getActiveProject, listProjects, setActiveProject } from '@tael/core';
 import { ui } from '../ui.js';
 
 export interface ProjectAddOptions {
   description?: string;
+  repo?: string | false;
 }
 
 export async function projectAddCommand(
@@ -16,8 +18,16 @@ export async function projectAddCommand(
     return;
   }
 
-  const project = await createProject(name, { description: options.description });
+  const repoPath =
+    options.repo === false
+      ? undefined
+      : resolve(typeof options.repo === 'string' ? options.repo : process.cwd());
+
+  const project = await createProject(name, { description: options.description, repoPath });
   ui.success(`Created project ${ui.bold(project.name)} ${ui.dim(`(${project.id})`)}`);
+  if (project.repoPath) {
+    ui.step(`Linked repo: ${ui.cyan(project.repoPath)}`);
+  }
 
   if (!(await getActiveProject())) {
     await setActiveProject(project.id);
@@ -40,6 +50,9 @@ export async function projectListCommand(): Promise<void> {
     console.log(`${marker} ${ui.bold(project.name)} ${ui.dim(`(${project.id})`)}`);
     if (project.description) {
       console.log(`   ${ui.dim(project.description)}`);
+    }
+    if (project.repoPath) {
+      console.log(`   ${ui.dim(project.repoPath)}`);
     }
   }
 }

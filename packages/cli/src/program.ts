@@ -39,6 +39,7 @@ export function createProgram(): Command {
     .command('sync')
     .description('Sync AI sessions (Claude, …) into the active project')
     .argument('[source]', 'limit to one source: claude')
+    .option('-y, --yes', 'skip confirmation prompts')
     .action(syncCommand);
 
   program
@@ -89,6 +90,8 @@ export function createProgram(): Command {
     .description('Create a new project')
     .argument('<name...>', 'project name')
     .option('-d, --description <text>', 'short description')
+    .option('-r, --repo <path>', 'link a repo path (defaults to the current dir)')
+    .option('--no-repo', 'do not link a repo')
     .action(projectAddCommand);
   project
     .command('list')
