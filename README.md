@@ -1,99 +1,233 @@
-# Tael
+<h1 align="center">Tael</h1>
 
-> Persistent context for humans and AI. Never start an AI session from scratch again.
+<p align="center">
+  Persistent context for humans and AI. Never start an AI session from scratch again.
+</p>
 
-Tael captures the context of your work — your project, your goals, and what you've
-been doing in Git — and turns it into a snapshot you can hand straight to an AI
-assistant like Claude or Cursor. Stop re-explaining your project at the start of
-every session.
+<p align="center">
+  <img src="https://img.shields.io/github/stars/keizerworks/tael?style=flat-square&color=111111&label=stars" alt="Stars">
+  <img src="https://img.shields.io/badge/license-AGPL--3.0-111111?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/node-%E2%89%A5%2020-111111?style=flat-square" alt="Node >= 20">
+  <img src="https://img.shields.io/badge/TypeScript-strict-111111?style=flat-square" alt="TypeScript">
+  <img src="https://img.shields.io/badge/works%20with-Claude%20%C2%B7%20Codex-111111?style=flat-square" alt="Works with Claude and Codex">
+</p>
 
-## Why
+<p align="center">
+  <strong>Git versions your code. Tael versions how you built it.</strong>
+</p>
 
-Every new AI chat starts cold. You paste the same background, re-describe the same
-architecture, and re-state what you were doing yesterday. Tael remembers it for you
-and hands the assistant a ready-to-paste briefing.
+---
+
+Tael is a persistent context layer for humans and AI.
+
+Modern AI tools work in silos. Claude remembers Claude sessions, Codex remembers Codex sessions, and every new conversation starts from zero. Important decisions, architectural discussions, and project history become fragmented across chat windows.
+
+Tael brings that context together.
+
+It captures your AI sessions, project decisions, tracked work, and development history, turning them into a unified memory you can carry across tools, sessions, and machines.
+
+## Why Tael?
+
+Developers constantly repeat themselves:
+
+- What are we building?
+- Why did we choose this architecture?
+- What have we already tried?
+- What should we work on next?
+- Where did we leave off?
+
+The context already exists, but it is scattered across:
+
+- AI conversations
+- Git commits
+- Notes and documents
+- Terminal sessions
+- Project management tools
+
+Tael creates a shared memory layer across all of them.
+
+## Before / After
+
+You build the backend with Claude and the frontend with Codex.
+
+A week later you return to the project and half the decisions are a mystery. The reasoning lived inside chat sessions scattered across multiple tools, or disappeared when the session ended.
+
+With Tael:
+
+```text
+$ tael sync
+Synced 3 new sessions into My App.
+
+$ tael
+Tael · My App · claude-sonnet-4
+
+> where did I leave off, and what's next?
+```
+
+The chat answers using the summarized history of every session, recent work, tracked features, and known bugs.
+
+Switch tools, close the laptop, come back tomorrow — your context remains intact.
+
+## How It Works
+
+```text
+1. Work in your favorite AI tool
+   Claude, Codex, Cursor, and more.
+
+2. Sync your sessions
+   $ tael sync
+
+3. Track features and bugs
+   $ tael feature add "checkout flow"
+
+4. Continue anywhere
+   $ tael
+
+5. Ask questions or resume work
+   "What did we decide about authentication?"
+```
+
+Tael reads the session logs your AI tools already maintain, summarizes new conversations, and stores them as durable project memory.
+
+The memory is:
+
+- Small enough to fit into model context windows.
+- Durable enough to outlive any single chat session.
+- Portable across tools and machines.
+
+## Features
+
+- Persistent project memory
+- Cross-tool AI session history
+- Local-first storage
+- Interactive project-aware chat
+- Feature and bug tracking
+- Session summarization
+- Semantic project context
+- Human-readable storage
+- Bring your own model and API key
 
 ## Install
 
-> Not yet published to npm. For local development, see [Development](#development).
+Tael is currently under active development.
+
+Requirements:
+
+- Node.js 20+
+- pnpm
+
+Clone and build from source:
 
 ```bash
-# (coming soon)
-npm install -g @tael/cli
+git clone https://github.com/keizerworks/tael
+cd tael
+
+pnpm install
+pnpm build
 ```
 
-## Quick start
+You can then run the CLI locally:
 
 ```bash
-# 1. Create a .tael/ workspace in your project
+node packages/cli/dist/index.js
+```
+
+Optionally create an alias:
+
+```bash
+alias tael="node $(pwd)/packages/cli/dist/index.js"
+```
+
+## Quick Start
+
+Initialize Tael:
+
+```bash
 tael init
-
-# 2. Snapshot your current Git context as a session
-tael sync
-
-# 3. Get pasteable context to hand to your AI assistant
-tael continue
 ```
 
-`tael continue` prints something you paste directly into Claude / Cursor:
-
-```md
-Project: Student Intelligence
-
-Recent commits:
-
-- Added voice runtime
-- Added cognition engine
-
-Current branch: feat/voice
-
-Suggested context:
-Continue working on Student Intelligence. Previously we implemented...
-```
-
-## How it works
-
-`tael init` creates a local, human-readable workspace:
-
-```text
-.tael/
-├── config.json      # workspace metadata (version, created date)
-├── profile.json     # who you are, current project, goals
-├── sessions/        # one JSON snapshot per `tael sync`
-└── memories/        # durable notes (future)
-```
-
-Everything is plain JSON on disk — diffable, committable, and yours.
-
-## Monorepo layout
-
-```text
-tael/
-├── apps/
-│   └── web/          # future web dashboard (v0.4)
-└── packages/
-    ├── cli/          # @tael/cli  — the `tael` command (thin presentation layer)
-    ├── core/         # @tael/core — all workspace, git & session logic
-    └── types/        # @tael/types — shared on-disk type contracts
-```
-
-## Development
-
-Requires Node >= 20 and pnpm.
+Create a project:
 
 ```bash
-pnpm install          # install all workspace deps
-pnpm build            # build every package (via turbo)
-pnpm dev              # watch-build every package
-pnpm typecheck        # type-check the workspace
-pnpm test             # run tests
-
-# Run the freshly built CLI without publishing:
-node packages/cli/dist/index.js init
+tael project add "Student Intelligence"
+tael use student-intelligence
 ```
 
-See [`docs/roadmap.md`](docs/roadmap.md) for what's next.
+Track your work:
+
+```bash
+tael feature add "voice learning"
+tael bug add "login redirect issue"
+```
+
+Import AI sessions:
+
+```bash
+tael sync
+```
+
+Open the project-aware chat:
+
+```bash
+tael
+```
+
+Ask questions:
+
+```text
+> where did I leave off?
+> what architectural decisions have we made?
+> what's the highest priority task?
+```
+
+## Commands
+
+| Command             | Description                      |
+| ------------------- | -------------------------------- |
+| `tael`              | Open the interactive chat        |
+| `tael init`         | Initialize Tael locally          |
+| `tael sync`         | Import and summarize AI sessions |
+| `tael status`       | Show current project status      |
+| `tael project add`  | Create a project                 |
+| `tael use`          | Switch active project            |
+| `tael feature`      | Manage project features          |
+| `tael bug`          | Manage bugs                      |
+| `tael session list` | Browse synced sessions           |
+| `tael ask`          | Ask a project-aware question     |
+
+## Storage
+
+Tael stores everything locally in a human-readable format.
+
+```text
+~/.tael/
+├── profile.md
+├── state.json
+├── projects/
+│   └── my-project/
+│       ├── project.json
+│       ├── features.json
+│       ├── bugs.json
+│       └── sessions/
+│           ├── session-1.md
+│           └── session-2.md
+└── config.json
+```
+
+Your memory belongs to you.
+
+No proprietary formats. No vendor lock-in.
 
 ## License
 
-[AGPL-3.0-only](LICENSE)
+Licensed under AGPL-3.0.
+
+## Star History
+
+<a href="https://star-history.com/#keizerworks/tael&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=keizerworks/tael&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=keizerworks/tael&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=keizerworks/tael&type=Date" />
+  </picture>
+</a>
