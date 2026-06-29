@@ -31,6 +31,7 @@ export async function initCommand(options: InitCommandOptions): Promise<void> {
   console.log(ui.dim('  .tael/'));
   console.log(ui.dim('  ├── config.json'));
   console.log(ui.dim('  ├── profile.json'));
+  console.log(ui.dim('  ├── contexts/'));
   console.log(ui.dim('  ├── sessions/'));
   console.log(ui.dim('  └── memories/'));
   console.log();

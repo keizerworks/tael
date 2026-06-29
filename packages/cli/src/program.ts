@@ -2,6 +2,9 @@ import { Command } from 'commander';
 import { initCommand } from './commands/init.js';
 import { syncCommand } from './commands/sync.js';
 import { continueCommand } from './commands/continue.js';
+import { loginCommand } from './commands/login.js';
+import { askCommand } from './commands/ask.js';
+import { contextAddCommand, contextListCommand, contextShowCommand } from './commands/context.js';
 
 const VERSION = '0.1.0';
 
@@ -34,6 +37,43 @@ export function createProgram(): Command {
     .command('continue')
     .description('Print pasteable context to hand to your AI assistant')
     .action(continueCommand);
+
+  program
+    .command('login')
+    .description('Configure your model provider and API key')
+    .option('-p, --provider <provider>', 'provider: anthropic | openai', 'anthropic')
+    .option('-m, --model <model>', 'model id (defaults per provider)')
+    .option('-k, --key <key>', 'API key (omit to use the provider env var)')
+    .action(loginCommand);
+
+  program
+    .command('ask')
+    .description('Ask anything; answered with your context via your model')
+    .argument('<question...>', 'your question')
+    .option('--max-tokens <number>', 'max tokens in the response', (value) =>
+      Number.parseInt(value, 10),
+    )
+    .option('--temperature <number>', 'sampling temperature', (value) => Number.parseFloat(value))
+    .action(askCommand);
+
+  const context = program.command('context').description('Manage your context store');
+
+  context
+    .command('add')
+    .description('Add a context (title + description + body)')
+    .argument('<title...>', 'context title')
+    .option('-d, --description <text>', 'short description')
+    .option('-b, --body <text>', 'body content')
+    .option('-f, --file <path>', 'read the body from a file')
+    .action(contextAddCommand);
+
+  context.command('list').alias('ls').description('List your contexts').action(contextListCommand);
+
+  context
+    .command('show')
+    .description('Show a context by id')
+    .argument('<id>', 'context id')
+    .action(contextShowCommand);
 
   return program;
 }
