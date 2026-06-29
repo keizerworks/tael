@@ -9,4 +9,7 @@ export default defineConfig({
   dts: false,
   noExternal: [/^@tael\//],
   banner: { js: '#!/usr/bin/env node' },
+  esbuildOptions(options) {
+    options.jsx = 'automatic';
+  },
 });
