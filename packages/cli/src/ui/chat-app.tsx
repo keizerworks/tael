@@ -5,7 +5,7 @@ import { parseMentions, type ChatSession } from '@tael/core';
 import { renderMarkdown } from '../markdown.js';
 
 interface Message {
-  role: 'user' | 'assistant' | 'error' | 'info';
+  role: 'user' | 'assistant' | 'error' | 'info' | 'action';
   content: string;
 }
 
@@ -51,6 +51,13 @@ function MessageView({ message }: { message: Message }) {
     return (
       <Box marginBottom={1}>
         <Text dimColor>{message.content}</Text>
+      </Box>
+    );
+  }
+  if (message.role === 'action') {
+    return (
+      <Box marginBottom={1}>
+        <Text color="green">{message.content}</Text>
       </Box>
     );
   }
@@ -120,8 +127,16 @@ function ChatApp({ chat, mentions, projectName }: ChatAppProps) {
       const message = mentioned.length
         ? `${question}\n\n[The user referenced: ${mentioned.join(', ')}. Prioritise these.]`
         : question;
-      const answer = await chat.send(message);
-      append({ role: 'assistant', content: answer });
+      const turn = await chat.send(message);
+      if (turn.content) {
+        append({ role: 'assistant', content: turn.content });
+      }
+      if (turn.executed.length > 0) {
+        append({
+          role: 'action',
+          content: turn.executed.map((e) => `${e.ok ? '✔' : '✖'} ${e.summary}`).join('\n'),
+        });
+      }
     } catch (error) {
       append({ role: 'error', content: error instanceof Error ? error.message : String(error) });
     } finally {
