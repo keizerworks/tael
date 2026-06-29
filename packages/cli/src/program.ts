@@ -10,6 +10,7 @@ import { projectAddCommand, projectListCommand } from './commands/project.js';
 import { useCommand } from './commands/use.js';
 import { feature } from './commands/feature.js';
 import { bug } from './commands/bug.js';
+import { sessionListCommand, sessionShowCommand } from './commands/session.js';
 
 const VERSION = '0.1.0';
 
@@ -36,11 +37,8 @@ export function createProgram(): Command {
 
   program
     .command('sync')
-    .description('Capture the current Git context as a session snapshot')
-    .option('-s, --summary <summary>', 'a short note about what this session is about')
-    .option('-c, --commits <number>', 'number of recent commits to capture', (value) =>
-      Number.parseInt(value, 10),
-    )
+    .description('Sync AI sessions (Claude, …) into the active project')
+    .argument('[source]', 'limit to one source: claude')
     .action(syncCommand);
 
   program
@@ -119,6 +117,18 @@ export function createProgram(): Command {
     .description('Mark a feature complete')
     .argument('<id>', 'feature id')
     .action((id: string) => feature.done(id));
+
+  const session = program.command('session').description('Browse synced AI sessions');
+  session
+    .command('list', { isDefault: true })
+    .description('List synced sessions')
+    .action(sessionListCommand);
+  session
+    .command('show')
+    .description('Show a session summary (or the full original with --full)')
+    .argument('<id>', 'session id')
+    .option('--full', 'print the full original transcript via its saved link')
+    .action(sessionShowCommand);
 
   const bugCmd = program.command('bug').description('Track bugs on the active project');
   bugCmd
