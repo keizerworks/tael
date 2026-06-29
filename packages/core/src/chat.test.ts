@@ -49,8 +49,8 @@ describe('ChatSession', () => {
     const chat = await ChatSession.create({ credentials });
     expect(chat.projectName).toBe('Tael');
 
-    expect(await chat.send('hi')).toBe('first answer');
-    expect(await chat.send('again')).toBe('second answer');
+    expect((await chat.send('hi')).content).toBe('first answer');
+    expect((await chat.send('again')).content).toBe('second answer');
 
     const firstBody = JSON.parse(fetchFn.mock.calls[0]![1].body as string);
     expect(firstBody.system).toContain('Active project: Tael');

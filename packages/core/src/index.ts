@@ -18,6 +18,7 @@ export * from './sources/source.js';
 export * from './sources/registry.js';
 export * from './sync-sessions.js';
 export * from './transcript.js';
+export * from './actions.js';
 export * from './ask.js';
 export * from './chat.js';
 

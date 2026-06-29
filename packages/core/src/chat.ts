@@ -1,5 +1,11 @@
 import { createProvider, type Provider } from '@tael/providers';
 import type { ChatMessage, ProviderCredentials } from '@tael/types';
+import {
+  ACTION_INSTRUCTIONS,
+  executeActions,
+  parseActions,
+  type ExecutedAction,
+} from './actions.js';
 import { buildProjectPrompt } from './context.js';
 import { loadCredentials } from './credentials.js';
 import { loadProfile } from './profile-store.js';
@@ -12,6 +18,11 @@ export interface ChatSessionOptions {
   temperature?: number;
 }
 
+export interface ChatTurn {
+  content: string;
+  executed: ExecutedAction[];
+}
+
 export class ChatSession {
   private readonly messages: ChatMessage[];
 
@@ -19,6 +30,7 @@ export class ChatSession {
     private readonly provider: Provider,
     private readonly model: string,
     private readonly options: ChatSessionOptions,
+    private readonly projectId: string,
     systemPrompt: string,
     public readonly projectName: string,
   ) {
@@ -36,11 +48,12 @@ export class ChatSession {
       loadProfile(),
     ]);
 
-    const systemPrompt = buildProjectPrompt({ profile, project, features, bugs, sessions });
+    const systemPrompt = `${buildProjectPrompt({ profile, project, features, bugs, sessions })}\n\n${ACTION_INSTRUCTIONS}`;
     return new ChatSession(
       createProvider(credentials),
       credentials.model,
       options,
+      project.id,
       systemPrompt,
       project.name,
     );
@@ -50,7 +63,7 @@ export class ChatSession {
     return this.model;
   }
 
-  async send(message: string): Promise<string> {
+  async send(message: string): Promise<ChatTurn> {
     this.messages.push({ role: 'user', content: message });
     const response = await this.provider.chat({
       messages: this.messages,
@@ -58,7 +71,11 @@ export class ChatSession {
       maxTokens: this.options.maxTokens,
       temperature: this.options.temperature,
     });
-    this.messages.push({ role: 'assistant', content: response.content });
-    return response.content;
+
+    const { actions, cleaned } = parseActions(response.content);
+    const executed = actions.length > 0 ? await executeActions(this.projectId, actions) : [];
+
+    this.messages.push({ role: 'assistant', content: cleaned });
+    return { content: cleaned, executed };
   }
 }
