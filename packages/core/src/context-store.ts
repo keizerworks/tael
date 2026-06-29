@@ -12,6 +12,17 @@ export class ContextExistsError extends TaelError {
   }
 }
 
+export function parseMentions(text: string): string[] {
+  const ids = new Set<string>();
+  for (const match of text.matchAll(/(?:^|\s)@([a-z0-9][a-z0-9-]*)/g)) {
+    const id = match[1];
+    if (id) {
+      ids.add(id);
+    }
+  }
+  return [...ids];
+}
+
 export function slugify(title: string): string {
   const slug = title
     .toLowerCase()

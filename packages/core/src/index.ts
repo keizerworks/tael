@@ -10,5 +10,6 @@ export * from './memories.js';
 export * from './context.js';
 export * from './context-store.js';
 export * from './ask.js';
+export * from './chat.js';
 
 export { SUPPORTED_PROVIDERS, DEFAULT_MODELS } from '@tael/providers';

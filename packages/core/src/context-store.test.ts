@@ -9,6 +9,7 @@ import {
   getContext,
   listContexts,
   parseContext,
+  parseMentions,
   slugify,
 } from './context-store.js';
 
@@ -16,6 +17,17 @@ describe('slugify', () => {
   it('makes a filesystem-safe id', () => {
     expect(slugify('Tael — Product!')).toBe('tael-product');
     expect(slugify('   ')).toBe('context');
+  });
+});
+
+describe('parseMentions', () => {
+  it('extracts unique @context ids and ignores emails', () => {
+    expect(parseMentions('compare @tael-product with @current-milestone please')).toEqual([
+      'tael-product',
+      'current-milestone',
+    ]);
+    expect(parseMentions('mail me at rahul@example.com')).toEqual([]);
+    expect(parseMentions('@a and @a again')).toEqual(['a']);
   });
 });
 
