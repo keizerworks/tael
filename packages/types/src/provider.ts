@@ -23,4 +23,6 @@ export interface ProviderCredentials {
   provider: ProviderName;
   model: string;
   apiKey: string;
+  /** Optional cheaper model used only for session summarization. */
+  summaryModel?: string;
 }

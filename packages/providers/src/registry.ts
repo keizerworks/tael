@@ -10,6 +10,11 @@ export const DEFAULT_MODELS: Record<ProviderName, string> = {
   openai: 'gpt-4o',
 };
 
+export const DEFAULT_SUMMARY_MODELS: Record<ProviderName, string> = {
+  anthropic: 'claude-haiku-4-5-20251001',
+  openai: 'gpt-4o-mini',
+};
+
 export function createProvider(credentials: ProviderCredentials): Provider {
   switch (credentials.provider) {
     case 'anthropic':

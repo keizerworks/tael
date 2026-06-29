@@ -36,6 +36,7 @@ export async function syncSessions(
   const dir = options.dir ?? process.cwd();
   const credentials = options.credentials ?? (await loadCredentials());
   const provider = createProvider(credentials);
+  const summaryModel = credentials.summaryModel ?? credentials.model;
   const sources = options.sourceName ? [getSource(options.sourceName)] : availableSources();
 
   const synced: SyncedSession[] = [];
@@ -55,7 +56,7 @@ export async function syncSessions(
       }
 
       const response = await provider.chat({
-        model: credentials.model,
+        model: summaryModel,
         maxTokens: 1024,
         messages: [
           { role: 'system', content: SUMMARY_SYSTEM },

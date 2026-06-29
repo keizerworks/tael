@@ -17,6 +17,21 @@ export interface StoredCredentials {
   provider: ProviderName;
   model: string;
   apiKey?: string;
+  summaryModel?: string;
+}
+
+export interface CredentialsConfig {
+  provider?: ProviderName;
+  model?: string;
+  summaryModel?: string;
+  hasKey: boolean;
+}
+
+async function readStored(): Promise<Partial<StoredCredentials>> {
+  if (!existsSync(credentialsPath())) {
+    return {};
+  }
+  return JSON.parse(await readFile(credentialsPath(), 'utf8')) as Partial<StoredCredentials>;
 }
 
 export async function saveCredentials(credentials: StoredCredentials): Promise<void> {
@@ -27,11 +42,30 @@ export async function saveCredentials(credentials: StoredCredentials): Promise<v
   });
 }
 
+export async function updateCredentials(
+  patch: Partial<StoredCredentials>,
+): Promise<StoredCredentials> {
+  const merged = { ...(await readStored()), ...patch } as StoredCredentials;
+  await saveCredentials(merged);
+  return merged;
+}
+
+/** Read the stored config without requiring a usable key (for `tael status`). */
+export async function loadConfig(): Promise<CredentialsConfig> {
+  const stored = await readStored();
+  const hasKey = Boolean(
+    stored.apiKey || (stored.provider && process.env[ENV_KEYS[stored.provider]]),
+  );
+  return {
+    provider: stored.provider,
+    model: stored.model,
+    summaryModel: stored.summaryModel,
+    hasKey,
+  };
+}
+
 export async function loadCredentials(): Promise<ProviderCredentials> {
-  let stored: Partial<ProviderCredentials> = {};
-  if (existsSync(credentialsPath())) {
-    stored = JSON.parse(await readFile(credentialsPath(), 'utf8')) as Partial<ProviderCredentials>;
-  }
+  const stored = await readStored();
 
   if (!stored.provider) {
     throw new CredentialsError('No provider configured. Run `tael login` first.');
@@ -47,5 +81,10 @@ export async function loadCredentials(): Promise<ProviderCredentials> {
     );
   }
 
-  return { provider: stored.provider, model: stored.model, apiKey };
+  return {
+    provider: stored.provider,
+    model: stored.model,
+    apiKey,
+    ...(stored.summaryModel ? { summaryModel: stored.summaryModel } : {}),
+  };
 }
