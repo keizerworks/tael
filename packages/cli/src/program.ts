@@ -5,6 +5,7 @@ import { continueCommand } from './commands/continue.js';
 import { loginCommand } from './commands/login.js';
 import { askCommand } from './commands/ask.js';
 import { contextAddCommand, contextListCommand, contextShowCommand } from './commands/context.js';
+import { chatCommand } from './commands/chat.js';
 
 const VERSION = '0.1.0';
 
@@ -15,6 +16,11 @@ export function createProgram(): Command {
     .name('tael')
     .description('Persistent context for humans and AI.')
     .version(VERSION, '-v, --version');
+
+  program
+    .command('chat', { isDefault: true })
+    .description('Open an interactive chat that already knows your context')
+    .action(chatCommand);
 
   program
     .command('init')
