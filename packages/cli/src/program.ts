@@ -6,6 +6,10 @@ import { loginCommand } from './commands/login.js';
 import { askCommand } from './commands/ask.js';
 import { contextAddCommand, contextListCommand, contextShowCommand } from './commands/context.js';
 import { chatCommand } from './commands/chat.js';
+import { projectAddCommand, projectListCommand } from './commands/project.js';
+import { useCommand } from './commands/use.js';
+import { feature } from './commands/feature.js';
+import { bug } from './commands/bug.js';
 
 const VERSION = '0.1.0';
 
@@ -80,6 +84,57 @@ export function createProgram(): Command {
     .description('Show a context by id')
     .argument('<id>', 'context id')
     .action(contextShowCommand);
+
+  const project = program.command('project').description('Manage projects');
+  project
+    .command('add')
+    .description('Create a new project')
+    .argument('<name...>', 'project name')
+    .option('-d, --description <text>', 'short description')
+    .action(projectAddCommand);
+  project
+    .command('list')
+    .alias('ls')
+    .description('List projects (● marks the active one)')
+    .action(projectListCommand);
+
+  program
+    .command('use')
+    .description('Set the active project for your work')
+    .argument('<project>', 'project id')
+    .action(useCommand);
+
+  const featureCmd = program.command('feature').description('Track features on the active project');
+  featureCmd
+    .command('add')
+    .description('Add a feature')
+    .argument('<title...>', 'feature title')
+    .action((parts: string[]) => feature.add(parts));
+  featureCmd
+    .command('list', { isDefault: true })
+    .description('List features')
+    .action(() => feature.list());
+  featureCmd
+    .command('done')
+    .description('Mark a feature complete')
+    .argument('<id>', 'feature id')
+    .action((id: string) => feature.done(id));
+
+  const bugCmd = program.command('bug').description('Track bugs on the active project');
+  bugCmd
+    .command('add')
+    .description('Add a bug')
+    .argument('<title...>', 'bug title')
+    .action((parts: string[]) => bug.add(parts));
+  bugCmd
+    .command('list', { isDefault: true })
+    .description('List bugs')
+    .action(() => bug.list());
+  bugCmd
+    .command('done')
+    .description('Mark a bug complete')
+    .argument('<id>', 'bug id')
+    .action((id: string) => bug.done(id));
 
   return program;
 }
