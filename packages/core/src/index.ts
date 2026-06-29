@@ -1,5 +1,7 @@
 export * from './constants.js';
 export * from './errors.js';
+export * from './global-store.js';
+export * from './projects.js';
 export * from './paths.js';
 export * from './workspace.js';
 export * from './git.js';
