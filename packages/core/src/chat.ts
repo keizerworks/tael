@@ -4,6 +4,7 @@ import { buildProjectPrompt } from './context.js';
 import { loadCredentials } from './credentials.js';
 import { loadProfile } from './profile-store.js';
 import { listBugs, listFeatures, requireActiveProject } from './projects.js';
+import { listSyncedSessions } from './sessions-store.js';
 
 export interface ChatSessionOptions {
   credentials?: ProviderCredentials;
@@ -28,13 +29,14 @@ export class ChatSession {
     const credentials = options.credentials ?? (await loadCredentials());
     const project = await requireActiveProject();
 
-    const [features, bugs, profile] = await Promise.all([
+    const [features, bugs, sessions, profile] = await Promise.all([
       listFeatures(project.id),
       listBugs(project.id),
+      listSyncedSessions(project.id),
       loadProfile(),
     ]);
 
-    const systemPrompt = buildProjectPrompt({ profile, project, features, bugs });
+    const systemPrompt = buildProjectPrompt({ profile, project, features, bugs, sessions });
     return new ChatSession(
       createProvider(credentials),
       credentials.model,

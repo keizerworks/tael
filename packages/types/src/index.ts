@@ -4,6 +4,7 @@ export type { GitCommit, Session } from './session.js';
 export type { Memory } from './memory.js';
 export type { Context } from './context.js';
 export type { ItemStatus, Project, TrackedItem, Feature, Bug, TaelState } from './project.js';
+export type { SessionSourceName, SyncedSession } from './sync.js';
 export type {
   ProviderName,
   ChatRole,

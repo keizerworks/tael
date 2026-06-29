@@ -12,6 +12,12 @@ export * from './profile-store.js';
 export * from './memories.js';
 export * from './context.js';
 export * from './context-store.js';
+export * from './frontmatter.js';
+export * from './sessions-store.js';
+export * from './sources/source.js';
+export * from './sources/registry.js';
+export * from './sync-sessions.js';
+export * from './transcript.js';
 export * from './ask.js';
 export * from './chat.js';
 

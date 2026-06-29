@@ -4,6 +4,7 @@ import { buildProjectMessages } from './context.js';
 import { loadCredentials } from './credentials.js';
 import { loadProfile } from './profile-store.js';
 import { listBugs, listFeatures, requireActiveProject } from './projects.js';
+import { listSyncedSessions } from './sessions-store.js';
 
 export interface AskOptions {
   credentials?: ProviderCredentials;
@@ -15,13 +16,14 @@ export async function ask(question: string, options: AskOptions = {}): Promise<C
   const credentials = options.credentials ?? (await loadCredentials());
   const project = await requireActiveProject();
 
-  const [features, bugs, profile] = await Promise.all([
+  const [features, bugs, sessions, profile] = await Promise.all([
     listFeatures(project.id),
     listBugs(project.id),
+    listSyncedSessions(project.id),
     loadProfile(),
   ]);
 
-  const messages = buildProjectMessages({ profile, project, features, bugs }, question);
+  const messages = buildProjectMessages({ profile, project, features, bugs, sessions }, question);
   const provider = createProvider(credentials);
 
   return provider.chat({

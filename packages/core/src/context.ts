@@ -1,11 +1,14 @@
-import type { Bug, ChatMessage, Feature, Project } from '@tael/types';
+import type { Bug, ChatMessage, Feature, Project, SyncedSession } from '@tael/types';
 
 export interface ProjectContextInput {
   profile: string;
   project: Project;
   features: Feature[];
   bugs: Bug[];
+  sessions: SyncedSession[];
 }
+
+const MAX_PROMPT_SESSIONS = 5;
 
 function renderChecklist(items: Array<Feature | Bug>): string[] {
   if (items.length === 0) {
@@ -19,6 +22,7 @@ export function buildProjectPrompt({
   project,
   features,
   bugs,
+  sessions,
 }: ProjectContextInput): string {
   const lines: string[] = [
     'You are Tael, a personal assistant that already knows the user and their projects.',
@@ -36,6 +40,13 @@ export function buildProjectPrompt({
 
   lines.push('', '### Features', ...renderChecklist(features));
   lines.push('', '### Bugs', ...renderChecklist(bugs));
+
+  if (sessions.length > 0) {
+    lines.push('', '## Recent sessions');
+    for (const session of sessions.slice(0, MAX_PROMPT_SESSIONS)) {
+      lines.push('', `### ${session.title} (${session.date.slice(0, 10)})`, session.summary.trim());
+    }
+  }
 
   return lines.join('\n');
 }
